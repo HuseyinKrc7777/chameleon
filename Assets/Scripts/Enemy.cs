@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -30,5 +31,15 @@ public class Enemy : MonoBehaviour
             currentPoint = (currentPoint + 1) % patrolPoints.Count;
             agent.SetDestination(patrolPoints[currentPoint].position);
         }
+    }
+
+    public Transform Explode()
+    {
+        //burada bu obje kapatılacak , fakat oyuncu bölüm sırasında ölürse deloadlanıp prefabdan 
+        //tekra yükleneceğinden dolayı tekrar açılmasına gerek yoktur,
+        //direk yok edlse daha iyi gibi
+        gameObject.SetActive(false);
+        Destroy(gameObject,5);
+        return transform.Find("Sprite");
     }
 }
