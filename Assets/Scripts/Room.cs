@@ -4,6 +4,8 @@ using UnityEngine;
 public class Room : MonoBehaviour
 {
     List<RoomLoader> roomLoaders = new();
+    List<Enemy> enemies = new();
+
     public bool _isRoomActive = false;
     void Start()
     {
@@ -19,9 +21,19 @@ public class Room : MonoBehaviour
             roomLoaders.Add(loader);
             loader.Room = this;
         }
+
+        foreach(Enemy enemy in gameObject.GetComponentsInChildren<Enemy>())
+        {
+            enemies.Add(enemy);
+            enemy.Room = this;
+        }
         if (_isRoomActive)
         {
             ActivateRoom();
+        }
+        else
+        {
+            DeActivateRoom();
         }
     }
 
@@ -38,11 +50,21 @@ public class Room : MonoBehaviour
     public void ActivateRoom()
     {
         _isRoomActive = true;
+        
+        
+        foreach(Enemy en in enemies)
+        {
+            en.gameObject.SetActive(true);
+        }
         //oda ile ilgli başka kod da olablir
     }
     public void DeActivateRoom()
     {
         _isRoomActive = false;
+        foreach(Enemy en in enemies)
+        {
+            en.gameObject.SetActive(false);
+        }
     }
 
     
