@@ -37,8 +37,9 @@ public class RoomController : MonoBehaviour
     {
         player.CurrentRoom.DeActivateRoom();
         player.transform.position = new(loader.ConnectedRoomLoader.transform.position.x,loader.ConnectedRoomLoader.transform.position.y,player.transform.position.z);
-        player.CurrentRoom = loader.ConnectedRoomLoader.Room;
         player.lastUsedLoader = loader.ConnectedRoomLoader;
+        player.CurrentRoom = loader.ConnectedRoomLoader.Room;
         player.CurrentRoom.ActivateRoom();
+        player.CurrentRoom.ReloadRoom();
     }
 }

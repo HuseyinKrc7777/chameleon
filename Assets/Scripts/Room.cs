@@ -4,7 +4,18 @@ using UnityEngine;
 public class Room : MonoBehaviour
 {
     List<RoomLoader> roomLoaders = new();
-    List<Enemy> enemies = new();
+    List<EnemyPositionPair> enemies = new();
+    struct EnemyPositionPair
+    {
+        public Vector3 position;
+        public Enemy enemy;
+
+        public EnemyPositionPair(Vector3 position, Enemy enemy)
+        {
+            this.position = position;
+            this.enemy = enemy;
+        }
+    }
 
     public bool _isRoomActive = false;
     void Start()
@@ -24,7 +35,7 @@ public class Room : MonoBehaviour
 
         foreach(Enemy enemy in gameObject.GetComponentsInChildren<Enemy>())
         {
-            enemies.Add(enemy);
+            enemies.Add(new(enemy.transform.position,enemy));
             enemy.Room = this;
         }
         if (_isRoomActive)
@@ -34,6 +45,18 @@ public class Room : MonoBehaviour
         else
         {
             DeActivateRoom();
+        }
+
+        
+    }
+    public void ReloadRoom()
+    {
+        foreach(EnemyPositionPair enemyp in enemies)
+        {
+            var Enemy = enemyp.enemy;
+            Enemy.transform.position = enemyp.position;
+            Enemy.currentPoint = 0;
+            Enemy.gameObject.SetActive(true);
         }
     }
 
@@ -52,8 +75,9 @@ public class Room : MonoBehaviour
         _isRoomActive = true;
         
         
-        foreach(Enemy en in enemies)
+        foreach(EnemyPositionPair enp in enemies)
         {
+            Enemy en = enp.enemy;
             en.gameObject.SetActive(true);
         }
         //oda ile ilgli başka kod da olablir
@@ -61,8 +85,9 @@ public class Room : MonoBehaviour
     public void DeActivateRoom()
     {
         _isRoomActive = false;
-        foreach(Enemy en in enemies)
+        foreach(EnemyPositionPair enp in enemies)
         {
+            Enemy en = enp.enemy;
             en.gameObject.SetActive(false);
         }
     }

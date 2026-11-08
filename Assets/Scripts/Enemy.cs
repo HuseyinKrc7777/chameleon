@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ChameleonGame;
 using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.AI;
@@ -7,11 +8,14 @@ public class Enemy : MonoBehaviour
 {
     public Room Room;
     public List<Transform> patrolPoints = new();
-    int currentPoint = 0;
+    public int currentPoint = 0;
+    [SerializeField] Animals animal;
+    [SerializeField] public GameObject spriteObject;
     NavMeshAgent agent;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if(animal == Animals.NONE)
+            Debug.LogError("ANIMAL NOT SET");
         agent = GetComponent<NavMeshAgent>();
 
         agent.updateRotation = false;
@@ -20,7 +24,6 @@ public class Enemy : MonoBehaviour
         agent.SetDestination(patrolPoints[currentPoint].position);
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (agent.pathPending)
@@ -33,13 +36,25 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public Transform Explode()
+    public EnemyInfoToSend Explode()
     {
         //burada bu obje kapatılacak , fakat oyuncu bölüm sırasında ölürse deloadlanıp prefabdan 
         //tekra yükleneceğinden dolayı tekrar açılmasına gerek yoktur,
         //direk yok edlse daha iyi gibi
         gameObject.SetActive(false);
-        Destroy(gameObject,5);
-        return transform.Find("Sprite");
+        //Destroy(gameObject,5);
+        return new EnemyInfoToSend(spriteObject,animal);
+    }
+}
+
+public struct EnemyInfoToSend
+{
+    public GameObject gameObjectOfTheEnemySprite;
+    public Animals typeOfAnimalOfTheEnemy;
+
+    public EnemyInfoToSend(GameObject gameObject,Animals animal) : this()
+    {
+        gameObjectOfTheEnemySprite = gameObject;
+        typeOfAnimalOfTheEnemy = animal;
     }
 }

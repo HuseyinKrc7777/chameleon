@@ -3,6 +3,7 @@ using ChameleonGame;
 using System;
 using UnityEditor.Media;
 using Unity.Cinemachine;
+using Unity.VisualScripting;
 public class PlayerController : MonoBehaviour
 {
     public float MoveSpeed = 8.0f;
@@ -12,6 +13,11 @@ public class PlayerController : MonoBehaviour
     public bool readyToCrossRooms = true;
     [SerializeField] private Room _currentRoom;
     [SerializeField] private LayerMask InteractLayers;
+
+    [SerializeField] Animals animal;
+    [SerializeField] GameObject CurrentSprite;
+
+    playerSave latestSave;
 
     public Room CurrentRoom
     {
@@ -28,17 +34,27 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         OnRoomChange += ChangeCameraToAnotherRoom;
+        OnRoomChange += SaveAfterRoomChange;
+
+    }
+    private void OnDestroy()
+    {
+        OnRoomChange -= ChangeCameraToAnotherRoom;
+        OnRoomChange -= SaveAfterRoomChange;
+
     }
 
     void Start()
     {
         _input = GetComponent<PlayerInputs>();
         _rigidbody = GetComponent<Rigidbody2D>();
+        animal = Animals.Chameleon;
     }
     void Update()
     {
         Move();
         Interact();
+        Menu();
     }
     private void LateUpdate()
     {
@@ -53,39 +69,59 @@ public class PlayerController : MonoBehaviour
         Vector3 pos = transform.position;
 
         transform.position = pos + playerMotion;
-        //rigidbody ile de hareket sağlanabilir
+        //rigidbody ile de hareket sağlanabilir?
 
 
+    }
+    private void Menu()
+    {
+        if(_input.menu)
+        {
+            LoadPlayer();
+            CurrentRoom.ReloadRoom();
+            _input.menu = false;
+        }
     }
     private void Interact()
     {
-        Vector2 origin = transform.position;
-        Vector2 direction = transform.up;
-
-        float radius = 0.5f;
-        float distance = 5f;
-
-        RaycastHit2D hit = Physics2D.CircleCast(
-            origin,
-            radius,
-            direction,
-            distance,
-            InteractLayers
-        );
-
-        if (hit.collider != null)
+        if (_input.interact)
         {
-            if(hit.collider.TryGetComponent<Enemy>(out Enemy enemy))
+            //TODO timeout eklenebilir
+            Vector2 origin = transform.position;
+            Vector2 direction = transform.up;
+
+            float radius = 0.5f;
+            float distance = 5f;
+
+            RaycastHit2D hit = Physics2D.CircleCast(
+                origin,
+                radius,
+                direction,
+                distance,
+                InteractLayers
+            );
+
+            if (hit.collider != null)
             {
-                Destroy(transform.Find("Sprite").gameObject);
-                Transform enemysprite = enemy.Explode();
-                //değişim animasyonu
-                enemysprite.parent = transform;
-                enemysprite.localPosition = new(0,0,enemysprite.transform.localPosition.z);
+                if (hit.collider.TryGetComponent<Enemy>(out Enemy enemy))
+                {
+                    //Destroy(transform.Find("Sprite").gameObject);
+                    CurrentSprite.SetActive(false);
+                    var info = enemy.Explode();
+                    GameObject enemysprite = info.gameObjectOfTheEnemySprite;
+                    animal = info.typeOfAnimalOfTheEnemy;
+                    //değişim animasyonu
+                    var currentSprite = GameObject.Instantiate(enemysprite, transform);
+                    currentSprite.transform.localPosition = new(0, 0, enemysprite.transform.localPosition.z);
+                    currentSprite.SetActive(true);
+                    CurrentSprite = currentSprite;
+                }
+                Debug.Log("Hit: " + hit.collider.name);
             }
-            Debug.Log("Hit: " + hit.collider.name);
         }
+
     }
+
     public CinemachineCamera virtualCamera;
     private CinemachineConfiner2D confiner;
 
@@ -96,6 +132,44 @@ public class PlayerController : MonoBehaviour
             confiner = virtualCamera.GetComponent<CinemachineConfiner2D>();
         }
         confiner.BoundingShape2D = room.GetComponent<Collider2D>();
+    }
+    private void SaveAfterRoomChange(Room room)
+    {
+        SavePlayer();
+    }
+
+    public void SavePlayer()
+    {
+        Debug.Log("saved player");
+        latestSave = new(lastUsedLoader, animal, CurrentSprite);
+    }
+    public void LoadPlayer()
+    {
+        readyToCrossRooms = false;
+        transform.position = new(latestSave.lastUsedLoader.transform.position.x, latestSave.lastUsedLoader.transform.position.y, transform.position.z);
+        animal = latestSave.animal;
+        CurrentSprite.SetActive(false);
+        var currentSprite = Instantiate(latestSave.spriteUsed, transform);
+        currentSprite.transform.localPosition = new(0, 0, latestSave.spriteUsed.transform.localPosition.z);
+        currentSprite.SetActive(true);
+        if(CurrentSprite!=latestSave.spriteUsed)
+            Destroy(CurrentSprite);
+        CurrentSprite = currentSprite;
+    }
+
+    public struct playerSave
+    {
+        public RoomLoader lastUsedLoader;
+        public Animals animal;
+        public GameObject spriteUsed;
+
+
+        public playerSave(RoomLoader lastUsedLoader, Animals animal, GameObject currentSprite) : this()
+        {
+            this.lastUsedLoader = lastUsedLoader;
+            this.animal = animal;
+            this.spriteUsed = currentSprite;
+        }
     }
 
 

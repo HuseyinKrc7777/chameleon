@@ -146,6 +146,8 @@ MonoBehaviour:
   InteractLayers:
     serializedVersion: 2
     m_Bits: 128
+  animal: 1
+  CurrentSprite: {fileID: 3480297298239147659}
   lastUsedLoader: {fileID: 0}
   _cam: {fileID: 0}
   virtualCamera: {fileID: 0}
