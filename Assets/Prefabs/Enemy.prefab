@@ -203,7 +203,8 @@ MonoBehaviour:
   patrolPoints:
   - {fileID: 0}
   - {fileID: 0}
-  animal: 2
+  currentPoint: 0
+  animal: 1
   spriteObject: {fileID: 4545017061183649170}
 --- !u!195 &7861419814028895155
 NavMeshAgent:

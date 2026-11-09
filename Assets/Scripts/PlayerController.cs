@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Room _currentRoom;
     [SerializeField] private LayerMask InteractLayers;
 
-    [SerializeField] Animals animal;
+    [SerializeField] public Animals animal;
     [SerializeField] GameObject CurrentSprite;
 
     playerSave latestSave;
@@ -31,16 +31,28 @@ public class PlayerController : MonoBehaviour
     public RoomLoader lastUsedLoader;
     [SerializeField] private Camera _cam;
     public event Action<Room> OnRoomChange;
+    public static PlayerController Instance { get; private set; }
+    public bool makingNoise = false;
     private void Awake()
     {
         OnRoomChange += ChangeCameraToAnotherRoom;
         OnRoomChange += SaveAfterRoomChange;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
 
     }
     private void OnDestroy()
     {
         OnRoomChange -= ChangeCameraToAnotherRoom;
         OnRoomChange -= SaveAfterRoomChange;
+        if (Instance == this)
+            Instance = null;
 
     }
 
@@ -48,13 +60,19 @@ public class PlayerController : MonoBehaviour
     {
         _input = GetComponent<PlayerInputs>();
         _rigidbody = GetComponent<Rigidbody2D>();
-        animal = Animals.Chameleon;
+        animal = Animals.Octopus;
+        MoveSpeed = AnimalData.Stats[animal].moveSpeed;
     }
     void Update()
     {
         Move();
         Interact();
         Menu();
+    }
+    public void Die()
+    {
+        LoadPlayer();
+        CurrentRoom.ReloadRoom();
     }
     private void LateUpdate()
     {
@@ -64,6 +82,10 @@ public class PlayerController : MonoBehaviour
     {
         float targetSpeed = _input.move == Vector2.zero ? 0.0f : MoveSpeed;
         _speed = Mathf.Lerp(_speed, targetSpeed, Time.deltaTime * 10.0f);
+        if(_speed > 0.1f)
+            makingNoise = true;
+        else
+            makingNoise = false;
         Vector3 inputDirection = new(_input.move.x, _input.move.y, 0);
         Vector3 playerMotion = inputDirection * (_speed * Time.deltaTime);
         Vector3 pos = transform.position;
@@ -75,7 +97,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Menu()
     {
-        if(_input.menu)
+        if (_input.menu)
         {
             LoadPlayer();
             CurrentRoom.ReloadRoom();
@@ -115,6 +137,9 @@ public class PlayerController : MonoBehaviour
                     currentSprite.transform.localPosition = new(0, 0, enemysprite.transform.localPosition.z);
                     currentSprite.SetActive(true);
                     CurrentSprite = currentSprite;
+
+                    //istatistikleri hayvana göre değiştir.
+                    MoveSpeed = AnimalData.Stats[animal].moveSpeed;
                 }
                 Debug.Log("Hit: " + hit.collider.name);
             }
@@ -152,7 +177,7 @@ public class PlayerController : MonoBehaviour
         var currentSprite = Instantiate(latestSave.spriteUsed, transform);
         currentSprite.transform.localPosition = new(0, 0, latestSave.spriteUsed.transform.localPosition.z);
         currentSprite.SetActive(true);
-        if(CurrentSprite!=latestSave.spriteUsed)
+        if (CurrentSprite != latestSave.spriteUsed)
             Destroy(CurrentSprite);
         CurrentSprite = currentSprite;
     }
