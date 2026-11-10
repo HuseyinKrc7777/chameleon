@@ -11,6 +11,7 @@ namespace ChameleonGame
 		public Vector2 move;
 		public bool interact;
 		public bool menu;
+		public bool abilty1;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -28,6 +29,10 @@ namespace ChameleonGame
 		{
 			menu = value.isPressed;
 		}
+		public void OnAbilty1(InputValue value)
+		{
+			abilty1 = value.isPressed;
+		}
 #endif
 
 
@@ -43,6 +48,10 @@ namespace ChameleonGame
 		public void MenuInput(bool newMenuState)
 		{
 			menu = newMenuState;
+		}
+		public void Abilty1Input(bool newstate)
+		{
+			abilty1 = newstate;
 		}
 	}
 	

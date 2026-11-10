@@ -12,10 +12,12 @@ public class Enemy : MonoBehaviour
     [SerializeField] Animals animal;
     [SerializeField] public GameObject spriteObject;
     NavMeshAgent agent;
-    Vector3 SearchPosition;
+    Vector2 SearchPosition;
 
-    state stateOfEnemy;
-    Vector3 startPos;
+    [SerializeField] state stateOfEnemy;
+    Vector2 startPos;
+
+    [SerializeField] LayerMask RaycastLayers;
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -82,8 +84,9 @@ public class Enemy : MonoBehaviour
 
         if (PlayerController.Instance.makingNoise && value < AnimalData.Stats[animal].hearDistance)
         {
+            Vector2 dir = (PlayerController.Instance.transform.position-transform.position).normalized;
             stateOfEnemy = state.Search;
-            SearchPosition = PlayerController.Instance.transform.position;
+                SearchPosition = new Vector2(transform.position.x,transform.position.y) + dir*2*dist / 3;
         }
         //oyuncunun aksiyonları buradan kontrol edilecek
         //oyuncu her aksiyon yaptığında buradan izlenecek gibi bişey olucak
@@ -95,7 +98,36 @@ public class Enemy : MonoBehaviour
         //TODO görüp , durumu eğer uzaktaysa aramaya ; yakındaysa takibe değiştirme mantığı eklenecek,
         // açılar ; uzaklık ve raycast kullanılacaktır.
         // hayvan istatistiklerinden yararlanılacaktır
+        Vector2 dir = (PlayerController.Instance.transform.position-transform.position).normalized;
+        float angle = Vector2.Angle(dir,agent.velocity.normalized);
+        //tespit görüş açı şeysi hayvandan hayvana değişebilir şekilde olabilr belki ? 
+        if(Mathf.Abs(angle) < 22.5)
+        {
+            var Panimal =PlayerController.Instance.animal; 
+            float dist = Vector2.Distance(PlayerController.Instance.transform.position,transform.position);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position,dir,dist+10f,RaycastLayers);
+            //eğer hayvan belli bir hayvan türünü görünce ekstra bişey oluyrsa / yani saldırmıyosa veya kaçıyosa
+            //burada halledilecektir
+            if(!hit.collider.gameObject.CompareTag("Player"))
+            {
+                Debug.LogError(hit.collider.gameObject);
+                return;
 
+            }
+                
+            float value = AnimalData.Stats[Panimal].visibility * dist;
+            
+            if(value < AnimalData.Stats[animal].seeDistance / 2)
+            {
+                stateOfEnemy = state.Chase;
+            }
+            else if(value < AnimalData.Stats[animal].seeDistance )
+            {
+                SearchPosition = new Vector2(transform.position.x,transform.position.y) + dir*dist / 2;
+                stateOfEnemy = state.Search;
+
+            }
+        }
 
     }
     float spinCounter = 0.0f;
@@ -109,7 +141,6 @@ public class Enemy : MonoBehaviour
         if (agent.remainingDistance <= agent.stoppingDistance)
         {
             spinCounter += Time.deltaTime;
-            transform.Rotate(new(0, 0, 5));
             if (spinCounter > 1.0f)
             {
                 stateOfEnemy = state.Patrol;
@@ -125,11 +156,21 @@ public class Enemy : MonoBehaviour
         //takibi bırakma koşulları görüşün kaybolması 
         //search moduna geçicek
         agent.SetDestination(PlayerController.Instance.transform.position);
-        if (agent.remainingDistance <= agent.stoppingDistance)
+        //oyuncu modelinin boyutuna göre filan fişman mesafe ayarlanıcak
+        if (agent.remainingDistance <= agent.stoppingDistance + 1.0f)
         {
-            PlayerController.Instance.Die();
+            //PlayerController.Instance.Die();
         }
         //direk oyuncuya gidecek
+    }
+
+    private void OnCollisionEnter2D(Collision2D other) {
+        if(stateOfEnemy==state.Chase && other.gameObject.CompareTag("Player"))
+        {
+            PlayerController.Instance.Die();
+            
+        }
+
     }
 
     public EnemyInfoToSend Explode()

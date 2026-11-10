@@ -36,9 +36,9 @@ namespace ChameleonGame
     {
         public static readonly Dictionary<Animals, AnimalStat> Stats = new Dictionary<Animals, AnimalStat>
         {
-            { Animals.Octopus, new AnimalStat(10f, 1f, 1f, 3f, 3f) },
-            { Animals.Snake,   new AnimalStat(5f, 1f, 1, 3,15) },
-            { Animals.Ocelot,  new AnimalStat(5f, 0.2f, 0.2f, 3f, 3f) },
+            { Animals.Octopus, new AnimalStat(10f, 1f, 1f, 10f, 5f) },
+            { Animals.Snake,   new AnimalStat(5f, 1f, 1, 15f, 10f) },
+            { Animals.Ocelot,  new AnimalStat(5f, 1f, 1f, 15f, 10f) },
             { Animals.Mantis,  new AnimalStat(5f, 0.1f, 0.1f, 3f, 3f) },
             { Animals.Raven,   new AnimalStat(5f, 0.1f, 0.9f, 3f, 3f) },
             { Animals.Wolf,    new AnimalStat(5f, 0.8f, 0.8f, 3f, 3f) },

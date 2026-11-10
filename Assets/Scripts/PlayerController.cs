@@ -82,7 +82,7 @@ public class PlayerController : MonoBehaviour
     {
         float targetSpeed = _input.move == Vector2.zero ? 0.0f : MoveSpeed;
         _speed = Mathf.Lerp(_speed, targetSpeed, Time.deltaTime * 10.0f);
-        if(_speed > 0.1f)
+        if(_speed > 0.1f && !_input.abilty1)
             makingNoise = true;
         else
             makingNoise = false;

@@ -206,6 +206,10 @@ MonoBehaviour:
   currentPoint: 0
   animal: 1
   spriteObject: {fileID: 4545017061183649170}
+  stateOfEnemy: 0
+  RaycastLayers:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!195 &7861419814028895155
 NavMeshAgent:
   m_ObjectHideFlags: 0

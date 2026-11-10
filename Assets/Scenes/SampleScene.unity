@@ -833,6 +833,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Room3
       objectReference: {fileID: 0}
+    - target: {fileID: 7554981668660195857, guid: 3930d8df5cea367d0bf71fbc704fb23a, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8885649401910609945, guid: 3930d8df5cea367d0bf71fbc704fb23a, type: 3}
       propertyPath: animal
       value: 2
