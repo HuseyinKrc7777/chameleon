@@ -15,6 +15,7 @@ public class Enemy : MonoBehaviour
     Vector3 SearchPosition;
 
     state stateOfEnemy;
+    Vector3 startPos;
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -26,6 +27,14 @@ public class Enemy : MonoBehaviour
             agent.SetDestination(patrolPoints[currentPoint].position);
 
         agent.speed = AnimalData.Stats[animal].moveSpeed;
+        startPos = transform.position;
+    }
+    public void ResetEnemy()
+    {
+        stateOfEnemy = state.Patrol;
+        currentPoint = 0;
+        transform.position = startPos;
+        gameObject.SetActive(true);
     }
     //agent.setdestiantion işi daha optimize olacak şekilde her kare değil de arada bir çağrılacak şekiled ayarlanacak
     void Update()
@@ -104,6 +113,7 @@ public class Enemy : MonoBehaviour
             if (spinCounter > 1.0f)
             {
                 stateOfEnemy = state.Patrol;
+                transform.rotation = Quaternion.identity;
                 spinCounter = 0;
             }
             //birkaç saniye dön sonra geri yoluna devam et
@@ -115,7 +125,7 @@ public class Enemy : MonoBehaviour
         //takibi bırakma koşulları görüşün kaybolması 
         //search moduna geçicek
         agent.SetDestination(PlayerController.Instance.transform.position);
-        if (agent.remainingDistance <= agent.stoppingDistance + 1.0f)
+        if (agent.remainingDistance <= agent.stoppingDistance)
         {
             PlayerController.Instance.Die();
         }
@@ -137,6 +147,7 @@ public class Enemy : MonoBehaviour
         Search,
         Chase
     }
+    
 }
 
 public struct EnemyInfoToSend

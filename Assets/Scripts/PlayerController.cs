@@ -180,6 +180,8 @@ public class PlayerController : MonoBehaviour
         if (CurrentSprite != latestSave.spriteUsed)
             Destroy(CurrentSprite);
         CurrentSprite = currentSprite;
+        MoveSpeed = AnimalData.Stats[animal].moveSpeed;
+
     }
 
     public struct playerSave
