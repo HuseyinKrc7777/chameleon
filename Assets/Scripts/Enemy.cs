@@ -17,6 +17,15 @@ public class Enemy : MonoBehaviour
     [SerializeField] state stateOfEnemy;
     Vector2 startPos;
 
+    public void HideEnemy()
+    {
+        spriteObject.SetActive(false);
+    }
+    public void RevealEnemy()
+    {
+        spriteObject.SetActive(true);
+    }
+
     [SerializeField] LayerMask RaycastLayers;
     void Start()
     {
@@ -30,6 +39,7 @@ public class Enemy : MonoBehaviour
 
         agent.speed = AnimalData.Stats[animal].moveSpeed;
         startPos = transform.position;
+        HideEnemy();
     }
     public void ResetEnemy()
     {
@@ -37,6 +47,7 @@ public class Enemy : MonoBehaviour
         currentPoint = 0;
         transform.position = startPos;
         gameObject.SetActive(true);
+        HideEnemy();
     }
     //agent.setdestiantion işi daha optimize olacak şekilde her kare değil de arada bir çağrılacak şekiled ayarlanacak
     void Update()
@@ -64,6 +75,7 @@ public class Enemy : MonoBehaviour
 
             ChasePlayer();
         }
+
 
     }
     void Patrol()
@@ -110,7 +122,6 @@ public class Enemy : MonoBehaviour
             //burada halledilecektir
             if(!hit.collider.gameObject.CompareTag("Player"))
             {
-                Debug.LogError(hit.collider.gameObject);
                 return;
 
             }

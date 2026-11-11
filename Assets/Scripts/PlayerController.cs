@@ -4,6 +4,7 @@ using System;
 using UnityEditor.Media;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
+using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     public float MoveSpeed = 8.0f;
@@ -33,6 +34,9 @@ public class PlayerController : MonoBehaviour
     public event Action<Room> OnRoomChange;
     public static PlayerController Instance { get; private set; }
     public bool makingNoise = false;
+    [SerializeField] GameObject seeArea;
+    [SerializeField] GameObject hearArea;
+
     private void Awake()
     {
         OnRoomChange += ChangeCameraToAnotherRoom;
@@ -68,6 +72,7 @@ public class PlayerController : MonoBehaviour
         Move();
         Interact();
         Menu();
+        seeAreaUpdate();
     }
     public void Die()
     {
@@ -93,6 +98,15 @@ public class PlayerController : MonoBehaviour
         transform.position = pos + playerMotion;
         //rigidbody ile de hareket sağlanabilir?
 
+
+    }
+
+    void seeAreaUpdate()
+    {
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        Vector2 middle = Camera.main.WorldToScreenPoint(transform.position);
+        Vector2 dir = middle-mousePos;
+        seeArea.transform.right = dir*-1;
 
     }
     private void Menu()
